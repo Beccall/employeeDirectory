@@ -1,13 +1,11 @@
 package employeeDirectory;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@Slf4j
 public class EmployeeController {
 
     private EmployeeService employeeService;
@@ -68,7 +66,12 @@ public class EmployeeController {
      * @return the newly updated Employee object
      */
     @PutMapping("/employees/{employeeId}")
-    public Employee updateEmployee(@PathVariable Long employeeId, @RequestBody Employee employee) {
-        return employeeService.updateEmployee(employee, employeeId);
+    public ResponseEntity<Object> updateEmployee(@PathVariable Long employeeId, @RequestBody Employee employee) {
+        Object response = employeeService.updateEmployee(employee, employeeId);
+
+        if (response instanceof ErrorMessage) {
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok().body(response);
     }
 }

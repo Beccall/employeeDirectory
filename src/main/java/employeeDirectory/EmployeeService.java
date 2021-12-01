@@ -7,6 +7,9 @@ import java.util.List;
 @Service
 public class EmployeeService {
 
+    private static final String MANAGER_ERROR_MESSAGE = "This role must have an assigned Manager";
+    private static final String ROLE_ERROR_MESSAGE = "Only these roles are supported: Manager, Developer, QA Tester";
+
     private EmployeeRepository employeeRepository;
 
     /**
@@ -34,13 +37,12 @@ public class EmployeeService {
      * @return the successfully saved Employee object or an error message object
      */
     public Object createNewEmployee(Employee employee) {
-        if (!employee.getRole().equalsIgnoreCase("manager") && employee.getManagerId() == null) {
-            return new ErrorMessage("This role must have an assigned Manager");
+
+        if(!isManagerValid(employee)) {
+            return new ErrorMessage(MANAGER_ERROR_MESSAGE);
         }
-        if (!employee.getRole().equalsIgnoreCase("manager")
-                && !employee.getRole().equalsIgnoreCase("developer")
-                && !employee.getRole().equalsIgnoreCase("qa tester")) {
-            return new ErrorMessage("Only these roles are supported: Manager, Developer, QA Tester");
+        if(!isRoleValid(employee)) {
+            return new ErrorMessage(ROLE_ERROR_MESSAGE);
         }
         return employeeRepository.save(employee);
     }
@@ -63,8 +65,45 @@ public class EmployeeService {
      * @param employee   the new employee with update details
      * @return the newly updated Employee object
      */
-    public Employee updateEmployee(Employee employee, Long employeeId) {
+    public Object updateEmployee(Employee employee, Long employeeId) {
         employee.setId(employeeId);
+
+        if(!isManagerValid(employee)) {
+            return new ErrorMessage(MANAGER_ERROR_MESSAGE);
+        }
+        if(!isRoleValid(employee)) {
+            return new ErrorMessage(ROLE_ERROR_MESSAGE);
+        }
         return employeeRepository.save(employee);
     }
+
+    /**
+     * Checks if Manager is required
+     * @param employee Employee object that is being created
+     * @return Returns false if Manager is required but set as null
+     */
+    private boolean isManagerValid(Employee employee) {
+
+        if (!employee.getRole().equalsIgnoreCase("manager") && employee.getManagerId() == null) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if Employee Role is valid
+     * @param employee Employee that is being created
+     * @return false if emoloyee Role is not developer, manager or qa tester
+     */
+    private boolean isRoleValid(Employee employee) {
+
+        if (!employee.getRole().equalsIgnoreCase("manager")
+                && !employee.getRole().equalsIgnoreCase("developer")
+                && !employee.getRole().equalsIgnoreCase("qa tester")) {
+            return false;
+        }
+        return true;
+    }
+
+
 }
